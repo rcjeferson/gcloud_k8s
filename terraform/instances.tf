@@ -13,7 +13,10 @@ resource "google_compute_instance" "control-plane" {
   machine_type = var.instances_machine_type
   zone         = var.zone
 
-  tags = ["allow-ssh"]
+  tags = [
+    "allow-internal-ports",
+    "allow-external-ports"
+  ]
 
   boot_disk {
     initialize_params {
@@ -42,7 +45,10 @@ resource "google_compute_instance" "worker" {
   machine_type = var.instances_machine_type
   zone         = var.zone
 
-  tags = ["allow-ssh"]
+  tags = [
+    "allow-internal-ports",
+    "allow-external-ports"
+  ]
 
   boot_disk {
     initialize_params {

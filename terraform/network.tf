@@ -36,12 +36,43 @@ resource "google_compute_address" "worker" {
   name  = "${var.project}-worker-${count.index + 1}"
 }
 
-resource "google_compute_firewall" "allow_ssh" {
-  name          = "allow-ssh"
+
+resource "google_compute_firewall" "internal_ports" {
+  count       = var.cluster_type == "instances" ? 1 : 0
+  name        = "allow-internal-ports"
+  network     = google_compute_network.k8s.name
+  target_tags = ["allow-internal-ports"]
+  source_ranges = [
+    "10.0.0.0/16",
+    "192.168.0.0/24",
+    "192.168.1.0/24"
+  ]
+
+  // TCP
+  allow {
+    protocol = "tcp"
+  }
+
+  // UDP
+  allow {
+    protocol = "udp"
+  }
+}
+
+resource "google_compute_firewall" "external_ports" {
+  count         = var.cluster_type == "instances" ? 1 : 0
+  name          = "allow-external-ports"
   network       = google_compute_network.k8s.name
-  target_tags   = ["allow-ssh"]
+  target_tags   = ["allow-external-ports"]
   source_ranges = ["0.0.0.0/0"]
 
+  // ICMP
+  allow {
+    protocol = "icmp"
+  }
+
+
+  // SSH
   allow {
     protocol = "tcp"
     ports    = ["22"]
